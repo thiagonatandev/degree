@@ -38,23 +38,25 @@ int main() {
             case 2:
                 listar_fila(&fila_diplomas);
                 break;
-            case 3:
+            case 3:{
                 Diploma *pronto = desenfileirar(&fila_diplomas);
                 if (pronto != NULL) {
                     empilhar(&pilha_diplomas, pronto);
                     printf("Diploma separado para entrega (movido para a pilha na mesa).\n");
                 }
                 break;
+            }    
             case 4:
                 listar_pilha(&pilha_diplomas);
                 break;
-            case 5:
+            case 5:{
                 Diploma *entregue = desempilhar(&pilha_diplomas);
                 if (entregue != NULL) {
                     printf("Diploma entregue ao aluno: %s\n", entregue->nome);
                     free(entregue);
                 }
                 break;
+            }
             default:
                 printf("Opção inválida!\n");
                 break;
