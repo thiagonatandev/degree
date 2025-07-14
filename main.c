@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "diplomas.h"
 
 int menu() {
@@ -10,6 +11,9 @@ int menu() {
     printf("3. Separar diploma para entrega (desenfileirar e empilhar)\n");
     printf("4. Mostrar pilha de diplomas separados\n");
     printf("5. Entregar diploma ao aluno (desempilhar)\n");
+    printf("6. Listar diplomas de um curso (fila e pilha)\n");
+    printf("7. Buscar diploma por nome (fila e pilha)\n");
+    printf("8. Ver diplomas por urgência (fila e pilha)\n");
     printf("0. Sair\n");
     printf("Escolha: ");
     scanf("%d", &opcao);
@@ -57,6 +61,28 @@ int main() {
                 }
                 break;
             }
+            case 6: {
+                char curso[50];
+                printf("Digite o curso: ");
+                fgets(curso, 50, stdin);
+                curso[strcspn(curso, "\n")] = 0;
+                listar_por_curso_fila(&fila_diplomas, curso);
+                listar_por_curso_pilha(&pilha_diplomas, curso);
+                break;
+            }
+            case 7: {
+                char nome[100];
+                printf("Digite o nome ou parte: ");
+                fgets(nome, 100, stdin);
+                nome[strcspn(nome, "\n")] = 0;
+                buscar_por_nome_fila(&fila_diplomas, nome);
+                buscar_por_nome_pilha(&pilha_diplomas, nome);
+                break;
+            }
+            case 8:
+                listar_urgencia_fila(&fila_diplomas);
+                listar_urgencia_pilha(&pilha_diplomas);
+                break;
             default:
                 printf("Opção inválida!\n");
                 break;
