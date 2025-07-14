@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "diplomas.h"
 
 Diploma *criar(int id){
@@ -19,12 +20,12 @@ Diploma *criar(int id){
     diploma->curso[strcspn(diploma->curso, "\n")] = 0;
 
     printf("Data de conclusão (DD/MM/AAAA): ");
-    fgets(diploma->data_conclusao, 11, stdin);
+    fgets(diploma->data_conclusao, 12, stdin);
     diploma->data_conclusao[strcspn(diploma->data_conclusao, "\n")] = 0;
 
-    printf("Prazo limite para retirada (DD/MM/AAAA): ");
-    fgets(diploma->prazo, 11, stdin);
-    diploma->prazo[strcspn(diploma->prazo, "\n")] = 0;
+    printf("Prazo limite para retirada em dias: ");
+    scanf("%d", &diploma->prazo_limite_dias);
+    getchar();
 
     printf("Diploma adicionado à fila!\n");
     return diploma;
@@ -34,8 +35,7 @@ void enfileirar(Diploma *diploma, Fila *fila){
     if(fila->base == NULL){
         fila->base = diploma;
         fila->topo = diploma;
-    }
-    else{
+    } else {
         fila->base->prox = diploma;
         fila->base = diploma;
     }
@@ -57,15 +57,16 @@ Diploma* desenfileirar(Fila* fila) {
 }
 
 void listar_fila(Fila *fila){
-    if(fila->base == NULL){
-        printf("Não há diplomas a serem exibidos.");
+    if(fila->topo == NULL){
+        printf("Não há diplomas a serem exibidos.\n");
         return;
     }
 
     Diploma *aux = fila->topo;
     printf("=== Diplomas na Fila (Prontos para retirada) ===\n");
     while(aux != NULL){
-        printf("ID:%d | Nome: %s | Curso: %s | Data de conclusão: %s | Prazo para retirada: %s", aux->id, aux->nome, aux->curso, aux->data_conclusao, aux->prazo);
+        printf("ID:%d | Nome: %s | Curso: %s | Data conclusão: %s | Prazo (dias): %d\n", 
+               aux->id, aux->nome, aux->curso, aux->data_conclusao, aux->prazo_limite_dias);
         aux = aux->prox;
     }
 }
@@ -90,7 +91,103 @@ void listar_pilha(Pilha *pilha) {
     Diploma* aux = pilha->topo;
     printf("=== Diplomas na Pilha (Separados para entrega) ===\n");
     while(aux != NULL) {
-       printf("ID: %d | Nome: %s | Curso: %s\n", aux->id, aux->nome, aux->curso);
+       printf("ID: %d | Nome: %s | Curso: %s | Data conclusão: %s | Prazo (dias): %d\n", 
+              aux->id, aux->nome, aux->curso, aux->data_conclusao, aux->prazo_limite_dias);
        aux = aux->prox; 
+    }
+}
+
+void listar_por_curso_fila(Fila *fila, const char *curso) {
+    Diploma *aux = fila->topo;
+    int pos = 1, encontrado = 0;
+    while(aux != NULL) {
+        if (strcmp(aux->curso, curso) == 0) {
+            printf("Fila - Posição %d: %s\n", pos, aux->nome);
+            encontrado = 1;
+        }
+        aux = aux->prox;
+        pos++;
+    }
+    if (!encontrado) printf("Nenhum diploma encontrado na fila para o curso %s.\n", curso);
+}
+
+void listar_por_curso_pilha(Pilha *pilha, const char *curso) {
+    Diploma *aux = pilha->topo;
+    int pos = 1, encontrado = 0;
+    while(aux != NULL) {
+        if (strcmp(aux->curso, curso) == 0) {
+            printf("Pilha - Posição %d: %s\n", pos, aux->nome);
+            encontrado = 1;
+        }
+        aux = aux->prox;
+        pos++;
+    }
+    if (!encontrado) printf("Nenhum diploma encontrado na pilha para o curso %s.\n", curso);
+}
+
+void buscar_por_nome_fila(Fila *fila, const char *nome) {
+    Diploma *aux = fila->topo;
+    int pos = 1, encontrado = 0;
+    while(aux != NULL) {
+        if (strstr(aux->nome, nome) != NULL) {
+            printf("Fila - Posição %d: %s\n", pos, aux->nome);
+            encontrado = 1;
+        }
+        aux = aux->prox;
+        pos++;
+    }
+    if (!encontrado) printf("Nenhum diploma com nome parecido encontrado na fila.\n");
+}
+
+void buscar_por_nome_pilha(Pilha *pilha, const char *nome) {
+    Diploma *aux = pilha->topo;
+    int pos = 1, encontrado = 0;
+    while(aux != NULL) {
+        if (strstr(aux->nome, nome) != NULL) {
+            printf("Pilha - Posição %d: %s\n", pos, aux->nome);
+            encontrado = 1;
+        }
+        aux = aux->prox;
+        pos++;
+    }
+    if (!encontrado) printf("Nenhum diploma com nome parecido encontrado na pilha.\n");
+}
+
+int calcular_dias_restantes(const char *data_conclusao, int prazo_dias) {
+    struct tm dt = {0};
+    int dia, mes, ano;
+
+    if (sscanf(data_conclusao, "%d/%d/%d", &dia, &mes, &ano) != 3) return -1;
+
+    dt.tm_mday = dia;
+    dt.tm_mon = mes - 1;
+    dt.tm_year = ano - 1900;
+    time_t t_conclusao = mktime(&dt);
+    if (t_conclusao == -1) return -1;
+
+    time_t t_limite = t_conclusao + (prazo_dias * 24 * 3600);
+    time_t agora = time(NULL);
+
+    int dias = (int)((t_limite - agora) / (24 * 3600));
+    return dias;
+}
+
+void listar_urgencia_fila(Fila *fila) {
+    Diploma *aux = fila->topo;
+    printf("=== Diplomas na Fila (Ordenados por urgência estimada) ===\n");
+    while(aux != NULL) {
+        int dias_rest = calcular_dias_restantes(aux->data_conclusao, aux->prazo_limite_dias);
+        printf("ID: %d | Nome: %s | Dias restantes: %d\n", aux->id, aux->nome, dias_rest);
+        aux = aux->prox;
+    }
+}
+
+void listar_urgencia_pilha(Pilha *pilha) {
+    Diploma *aux = pilha->topo;
+    printf("=== Diplomas na Pilha (Ordenados por urgência estimada) ===\n");
+    while(aux != NULL) {
+        int dias_rest = calcular_dias_restantes(aux->data_conclusao, aux->prazo_limite_dias);
+        printf("ID: %d | Nome: %s | Dias restantes: %d\n", aux->id, aux->nome, dias_rest);
+        aux = aux->prox;
     }
 }
