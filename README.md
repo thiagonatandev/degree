@@ -132,3 +132,11 @@ typedef struct {
 typedef struct {
     Diploma* topo;
 } Pilha;
+
+
+### Documentação utilizada
+- [Como criar um arquivo de criação](https://embarcados.com.br/introducao-ao-makefile/)
+- [Biblioteca time](https://petbcc.ufscar.br/time/)
+- [Descobrir valor de dias entre duas datas](https://www.geeksforgeeks.org/dsa/find-number-of-days-between-two-given-dates/)
+- [Calcular diferença entre duas datas](https://cboard.cprogramming.com/c-programming/167085-calculating-difference-between-two-dates.html)
+- [Como realizar a validação do formato de uma string sem RegEx](https://www.tutorialspoint.com/c_standard_library/c_function_sscanf.htm)
