@@ -132,7 +132,7 @@ typedef struct {
 typedef struct {
     Diploma* topo;
 } Pilha;
-
+```
 
 ### Documentação utilizada
 - [Como criar um arquivo de criação](https://embarcados.com.br/introducao-ao-makefile/)
