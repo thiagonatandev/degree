@@ -173,21 +173,85 @@ int calcular_dias_restantes(const char *data_conclusao, int prazo_dias) {
 }
 
 void listar_urgencia_fila(Fila *fila) {
+    int count = 0;
     Diploma *aux = fila->topo;
-    printf("=== Diplomas na Fila (Ordenados por urgência estimada) ===\n");
+
     while(aux != NULL) {
-        int dias_rest = calcular_dias_restantes(aux->data_conclusao, aux->prazo_limite_dias);
-        printf("ID: %d | Nome: %s | Dias restantes: %d\n", aux->id, aux->nome, dias_rest);
+        count++;
         aux = aux->prox;
     }
+
+    if(count == 0) {
+        printf("Fila vazia.\n");
+        return;
+    }
+
+    Diploma **vetor = malloc(count * sizeof(Diploma *));
+    aux = fila->topo;
+    for(int i = 0; i < count; i++) {
+        vetor[i] = aux;
+        aux = aux->prox;
+    }
+
+    for(int i = 0; i < count - 1; i++) {
+        for(int j = 0; j < count - i - 1; j++) {
+            int dias_j = calcular_dias_restantes(vetor[j]->data_conclusao, vetor[j]->prazo_limite_dias);
+            int dias_next = calcular_dias_restantes(vetor[j+1]->data_conclusao, vetor[j+1]->prazo_limite_dias);
+            if(dias_j > dias_next) {
+                Diploma *tmp = vetor[j];
+                vetor[j] = vetor[j+1];
+                vetor[j+1] = tmp;
+            }
+        }
+    }
+
+    printf("=== Diplomas na Fila (ordenados por urgência) ===\n");
+    for(int i = 0; i < count; i++) {
+        int dias = calcular_dias_restantes(vetor[i]->data_conclusao, vetor[i]->prazo_limite_dias);
+        printf("ID: %d | Nome: %s | Dias restantes: %d\n", vetor[i]->id, vetor[i]->nome, dias);
+    }
+
+    free(vetor);
 }
 
 void listar_urgencia_pilha(Pilha *pilha) {
+    int count = 0;
     Diploma *aux = pilha->topo;
-    printf("=== Diplomas na Pilha (Ordenados por urgência estimada) ===\n");
+
     while(aux != NULL) {
-        int dias_rest = calcular_dias_restantes(aux->data_conclusao, aux->prazo_limite_dias);
-        printf("ID: %d | Nome: %s | Dias restantes: %d\n", aux->id, aux->nome, dias_rest);
+        count++;
         aux = aux->prox;
     }
+
+    if(count == 0) {
+        printf("Pilha vazia.\n");
+        return;
+    }
+
+    Diploma **vetor = malloc(count * sizeof(Diploma *));
+    aux = pilha->topo;
+    for(int i = 0; i < count; i++) {
+        vetor[i] = aux;
+        aux = aux->prox;
+    }
+
+    for(int i = 0; i < count - 1; i++) {
+        for(int j = 0; j < count - i - 1; j++) {
+            int dias_j = calcular_dias_restantes(vetor[j]->data_conclusao, vetor[j]->prazo_limite_dias);
+            int dias_next = calcular_dias_restantes(vetor[j+1]->data_conclusao, vetor[j+1]->prazo_limite_dias);
+            if(dias_j > dias_next) {
+                Diploma *tmp = vetor[j];
+                vetor[j] = vetor[j+1];
+                vetor[j+1] = tmp;
+            }
+        }
+    }
+
+    printf("=== Diplomas na Pilha (ordenados por urgência) ===\n");
+    for(int i = 0; i < count; i++) {
+        int dias = calcular_dias_restantes(vetor[i]->data_conclusao, vetor[i]->prazo_limite_dias);
+        printf("ID: %d | Nome: %s | Dias restantes: %d\n", vetor[i]->id, vetor[i]->nome, dias);
+    }
+
+    free(vetor);
 }
